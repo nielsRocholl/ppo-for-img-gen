@@ -58,21 +58,24 @@ class ActorNetwork(nn.Module):
 
         self.checkpoint_file = os.path.join(chkpt_dir, 'actor_torch_ppo')
 
-        # Assuming input_dims = (7, 5, 5)
+        # Assuming input_dims = (fps, 5, 5)
         self.conv = nn.Sequential(
             nn.Conv2d(input_dims[0], 32, kernel_size=3, stride=1, padding=1),
             nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+
             nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
             nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
         )
 
         # Calculate the output shape after Conv2d layer
-        self.conv_output_size = 64 * input_dims[1] * input_dims[2]
+        self.conv_output_size = 64 * 1 * 1
 
         self.fc = nn.Sequential(
-            nn.Linear(self.conv_output_size, 256),
+            nn.Linear(self.conv_output_size, 128),
             nn.ReLU(),
-            nn.Linear(256, n_actions),
+            nn.Linear(128, n_actions),
             nn.Softmax(dim=-1)
         )
 
@@ -103,17 +106,20 @@ class CriticNetwork(nn.Module):
         self.conv = nn.Sequential(
             nn.Conv2d(input_dims[0], 32, kernel_size=3, stride=1, padding=1),
             nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+
             nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
-            nn.ReLU()
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
         )
 
         # Calculate the output shape after Conv2d layer
-        self.conv_output_size = 64 * input_dims[1] * input_dims[2]
+        self.conv_output_size = 64 * 1 * 1
 
         self.fc = nn.Sequential(
-            nn.Linear(self.conv_output_size, 256),
+            nn.Linear(self.conv_output_size, 128),
             nn.ReLU(),
-            nn.Linear(256, 1)
+            nn.Linear(128, 1)
         )
 
         self.optimizer = optim.Adam(self.parameters(), lr=alpha)
@@ -209,6 +215,10 @@ class Agent:
                 weighted_probs = advantage[batch] * prob_ratio
                 weighted_clipped_probs = T.clamp(prob_ratio, 1 - self.policy_clip,
                                                  1 + self.policy_clip) * advantage[batch]
+                # add entropy bonus to encourage exploration
+                entropy_bonus = -dist.entropy().mean()
+                # todo: Remove entropy bonus if it doesn't work
+                # actor_loss = -T.min(weighted_probs, weighted_clipped_probs).mean() - 0.02 * entropy_bonus
                 actor_loss = -T.min(weighted_probs, weighted_clipped_probs).mean()
 
                 returns = advantage[batch] + values[batch]

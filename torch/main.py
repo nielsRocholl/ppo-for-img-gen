@@ -7,7 +7,7 @@ from utils import load_image, visualize
 
 
 if __name__ == '__main__':
-    binary_image_array = load_image(kind="Simple", size=(5, 5))
+    binary_image_array = load_image(kind="Hard", size=(5, 5))
     env = ImageEnv(binary_image_array)
     N = 20
     batch_size = 5
@@ -43,7 +43,7 @@ if __name__ == '__main__':
             observation = observation_
         # concatenate the images horizontally
         images = np.hstack((binary_image_array, observation[2]))
-        visualize(binary_image_array, observation[2], kind="Print")
+        visualize(binary_image_array, observation[3], kind="Print")
         score_history.append(score)
         avg_score = np.mean(score_history[-100:])
 

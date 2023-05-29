@@ -16,11 +16,12 @@ class ImageEnv(gym.Env):
         # the state is a (9, 5, 5)
         self.observation_shape = target_image.shape
         # set the amount of frames to stack
-        self.fps = 3
+        self.fps = 4
         # Define action space (0 = black, 1 = white)
         self.action_space = Discrete(2)
         # Define observation space
-        self.observation_space = Box(low=0.0, high=1.0, shape=(self.fps * 2 + 1, self.state_space[0], self.state_space[0]), dtype=np.uint8)
+        self.observation_space = Box(low=0.0, high=1.0,
+                                     shape=(self.fps * 2 + 1, self.state_space[0], self.state_space[0]), dtype=np.uint8)
         self.history = []
         self.agent_position = 0
         self.agent_history = []
@@ -29,28 +30,34 @@ class ImageEnv(gym.Env):
     def calculate_reward_range(self):
         white_pixels = len(np.where(self.target_image == 1)[0])
         black_pixels = len(np.where(self.target_image == 0)[0])
-        reward_range = white_pixels * 1 + black_pixels * (white_pixels / black_pixels)
+        reward_range = white_pixels * 1 + black_pixels * (white_pixels / black_pixels) + 2
         return reward_range
 
-    def calculate_reward(self):
+    def calculate_reward(self) -> float:
+        """
+        Calculate the reward based on the current state and the target image the reward is pixel based,
+        it is important that the maximal amount of reward the agent can get by selecting white pixels is equal to the
+        maximal amount of reward the agent can get by selecting black pixels. If this is not the case, the agent will
+        always select the color that gives the most reward.
+        :return: reward
+        """
         flattened_state = self.state.flatten()
         flattened_target = self.target_image.flatten()
-
-        # if the color of the pixel is the same as the target image, return 1, else return -1
-        # if done:
-        #     if np.array_equal(flattened_state,  flattened_target):
-        #         return 5
-        #     else:
-        #         return -5
-        # if np.array_equal(flattened_state,  flattened_target):
-        #     return 5
-        if flattened_state[self.agent_position] == flattened_target[self.agent_position]:
+        # if the state is equal to the target image, return 5 (big reward)
+        if np.array_equal(flattened_state, flattened_target):
+            print("Target image reached!")
+            return 2
+        # else if the pixel at the agent position is equal to the target pixel
+        elif flattened_state[self.agent_position] == flattened_target[self.agent_position]:
+            # if that pixel is white, return 1
             if flattened_state[self.agent_position] == 1:
                 return 1
+            # if that pixel is black, return 1 / (white_pixels / black_pixels)
             else:
                 white_pixels = np.where(flattened_target == 1)[0]
                 black_pixels = np.where(flattened_target == 0)[0]
                 return len(white_pixels) / len(black_pixels)
+        # else if the pixel at the agent position is not equal to the target pixel (bad choice)
         else:
             return -(1 / (self.state_space[0] * self.state_space[1]))
 
@@ -83,7 +90,7 @@ class ImageEnv(gym.Env):
         agent_y = self.agent_position % self.state_space[1]
         agent_pos[agent_x][agent_y] = 1.0
         self.agent_history.append(agent_pos)
-        # append agent position anreward_ranged target image to history
+        # append agent position and reward_ranged target image to history
         state = np.concatenate(
             (self.history[-self.fps:], self.agent_history[-self.fps:], np.expand_dims(self.target_image, axis=0)),
             axis=0)
@@ -111,7 +118,6 @@ class ImageEnv(gym.Env):
 
     def get_target_image(self):
         return self.target_image
-
 
 # # Create a 5x5 array filled with zeros
 # binary_image_array = np.zeros((5, 5))
