@@ -16,7 +16,7 @@ class ImageEnv(gym.Env):
         # the state is a (9, 5, 5)
         self.observation_shape = target_image.shape
         # set the amount of frames to stack
-        self.fps = 4
+        self.fps = 2
         # Define action space (0 = black, 1 = white)
         self.action_space = Discrete(2)
         # Define observation space
@@ -59,7 +59,14 @@ class ImageEnv(gym.Env):
                 return len(white_pixels) / len(black_pixels)
         # else if the pixel at the agent position is not equal to the target pixel (bad choice)
         else:
-            return -(1 / (self.state_space[0] * self.state_space[1]))
+            # prevent the agent from making the whole image black by giving a negative reward
+            # when the agent makes a pixel that should be white black
+            if flattened_state[self.agent_position] == 0 and flattened_target[self.agent_position] == 1:
+                return -1
+            else:
+                white_pixels = np.where(flattened_target == 1)[0]
+                black_pixels = np.where(flattened_target == 0)[0]
+                return -(len(white_pixels) / len(black_pixels))
 
     def step(self, action):
 

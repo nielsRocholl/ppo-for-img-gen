@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import torch
 import torch as T
 import torch.nn as nn
 import torch.optim as optim
@@ -60,21 +61,20 @@ class ActorNetwork(nn.Module):
 
         # Assuming input_dims = (fps, 5, 5)
         self.conv = nn.Sequential(
-            nn.Conv2d(input_dims[0], 32, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-
-            nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(),
+            nn.Conv2d(input_dims[0], 64, kernel_size=3, stride=1, padding=1),
+            nn.RReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
         )
 
-        # Calculate the output shape after Conv2d layer
-        self.conv_output_size = 64 * 1 * 1
+        # Dummy forward pass to get the size of the output of the conv layers
+        with torch.no_grad():
+            dummy_input = T.zeros(1, *input_dims).to('cpu')  # assuming input_dims is the full shape
+            dummy_output = self.conv(dummy_input)
+            self.conv_output_size = np.prod(dummy_output.shape[1:])  # product of all dimensions except the batch size
 
         self.fc = nn.Sequential(
             nn.Linear(self.conv_output_size, 128),
-            nn.ReLU(),
+            nn.RReLU(),
             nn.Linear(128, n_actions),
             nn.Softmax(dim=-1)
         )
@@ -104,21 +104,20 @@ class CriticNetwork(nn.Module):
         self.checkpoint_file = os.path.join(chkpt_dir, 'critic_torch_ppo')
 
         self.conv = nn.Sequential(
-            nn.Conv2d(input_dims[0], 32, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-
-            nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(),
+            nn.Conv2d(input_dims[0], 64, kernel_size=3, stride=1, padding=1),
+            nn.RReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
         )
 
-        # Calculate the output shape after Conv2d layer
-        self.conv_output_size = 64 * 1 * 1
+        # Dummy forward pass to get the size of the output of the conv layers
+        with torch.no_grad():
+            dummy_input = T.zeros(1, *input_dims).to('cpu')  # assuming input_dims is the full shape
+            dummy_output = self.conv(dummy_input)
+            self.conv_output_size = np.prod(dummy_output.shape[1:])  # product of all dimensions except the batch size
 
         self.fc = nn.Sequential(
             nn.Linear(self.conv_output_size, 128),
-            nn.ReLU(),
+            nn.RReLU(),
             nn.Linear(128, 1)
         )
 

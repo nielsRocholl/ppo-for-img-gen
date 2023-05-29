@@ -7,16 +7,16 @@ from utils import load_image, visualize
 
 
 if __name__ == '__main__':
-    binary_image_array = load_image(kind="Hard", size=(5, 5))
+    binary_image_array = load_image(kind="Hard", size=(10, 10))
     env = ImageEnv(binary_image_array)
     N = 20
-    batch_size = 5
-    n_epochs = 4
-    alpha = 0.0003
+    batch_size = 256
+    n_epochs = 8
+    alpha = 0.0001 # 0.0001 works well on 10x10
     agent = Agent(n_actions=env.action_space.n, batch_size=batch_size,
                   alpha=alpha, n_epochs=n_epochs,
                   input_dims=env.observation_space.shape)
-    n_games = 300
+    n_games = 1000
 
     figure_file = 'plots/cartpole.png'
 
@@ -43,7 +43,7 @@ if __name__ == '__main__':
             observation = observation_
         # concatenate the images horizontally
         images = np.hstack((binary_image_array, observation[2]))
-        visualize(binary_image_array, observation[3], kind="Print")
+        visualize(binary_image_array, observation[1], kind="Print")
         score_history.append(score)
         avg_score = np.mean(score_history[-100:])
 
