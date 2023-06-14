@@ -59,10 +59,14 @@ class ActorNetwork(nn.Module):
 
         self.checkpoint_file = os.path.join(chkpt_dir, 'actor_torch_ppo')
 
-        # Assuming input_dims = (fps, 5, 5)
+        # Assuming input_dims = (fps, length, width)
         self.conv = nn.Sequential(
-            nn.Conv2d(input_dims[0], 64, kernel_size=3, stride=1, padding=1),
-            nn.RReLU(),
+            nn.Conv2d(input_dims[0], 64, kernel_size=2, stride=1, padding=0),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+
+            nn.Conv2d(64, 256, kernel_size=2, stride=1, padding=0),
+            nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
         )
 
@@ -73,14 +77,16 @@ class ActorNetwork(nn.Module):
             self.conv_output_size = np.prod(dummy_output.shape[1:])  # product of all dimensions except the batch size
 
         self.fc = nn.Sequential(
-            nn.Linear(self.conv_output_size, 128),
-            nn.RReLU(),
+            nn.Linear(self.conv_output_size, 256),
+            nn.ReLU(),
+            nn.Linear(256, 128),
+            nn.ReLU(),
             nn.Linear(128, n_actions),
             nn.Softmax(dim=-1)
         )
 
         self.optimizer = optim.Adam(self.parameters(), lr=alpha)
-        self.device = T.device('mps' if T.cuda.is_available() else 'cpu')
+        self.device = T.device('mps' if T.has_mps else 'cpu')
         self.to(self.device)
 
     def forward(self, state):
@@ -104,8 +110,12 @@ class CriticNetwork(nn.Module):
         self.checkpoint_file = os.path.join(chkpt_dir, 'critic_torch_ppo')
 
         self.conv = nn.Sequential(
-            nn.Conv2d(input_dims[0], 64, kernel_size=3, stride=1, padding=1),
-            nn.RReLU(),
+            nn.Conv2d(input_dims[0], 64, kernel_size=2, stride=1, padding=0),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+
+            nn.Conv2d(64, 256, kernel_size=2, stride=1, padding=0),
+            nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
         )
 
@@ -116,13 +126,15 @@ class CriticNetwork(nn.Module):
             self.conv_output_size = np.prod(dummy_output.shape[1:])  # product of all dimensions except the batch size
 
         self.fc = nn.Sequential(
-            nn.Linear(self.conv_output_size, 128),
-            nn.RReLU(),
+            nn.Linear(self.conv_output_size, 256),
+            nn.ReLU(),
+            nn.Linear(256, 128),
+            nn.ReLU(),
             nn.Linear(128, 1)
         )
 
         self.optimizer = optim.Adam(self.parameters(), lr=alpha)
-        self.device = T.device('mps' if T.cuda.is_available() else 'cpu')
+        self.device = T.device('mps' if T.has_mps else 'cpu')
         self.to(self.device)
 
     def forward(self, state):
@@ -130,7 +142,6 @@ class CriticNetwork(nn.Module):
         value = self.fc(conv_out)
 
         return value
-
 
     def save_checkpoint(self):
         T.save(self.state_dict(), self.checkpoint_file)
@@ -140,7 +151,7 @@ class CriticNetwork(nn.Module):
 
 
 class Agent:
-    def __init__(self, n_actions, input_dims, gamma=0.99, alpha=0.0003, gae_lambda=0.95,
+    def __init__(self, n_actions, input_dims, gamma=0.90, alpha=0.0003, gae_lambda=0.95,
                  policy_clip=0.2, batch_size=64, n_epochs=10):
         self.gamma = gamma
         self.policy_clip = policy_clip
@@ -167,7 +178,7 @@ class Agent:
         self.critic.load_checkpoint()
 
     def choose_action(self, observation):
-        state = T.tensor([observation], dtype=T.float).to(self.actor.device)
+        state = T.tensor(np.array([observation]), dtype=T.float).to(self.actor.device)
         dist = self.actor(state)
         value = self.critic(state)
         action = dist.sample()
@@ -196,12 +207,14 @@ class Agent:
                     discount *= self.gamma * self.gae_lambda
                 advantage[t] = a_t
             advantage = T.tensor(advantage).to(self.actor.device)
+            # conver values to float32
+            values = T.tensor(values, dtype=T.float32).to(self.actor.device)
 
-            values = T.tensor(values).to(self.actor.device)
+            # values = T.tensor(values).to(self.actor.device)
             for batch in batches:
-                states = T.tensor(state_arr[batch], dtype=T.float).to(self.actor.device)
-                old_probs = T.tensor(old_prob_arr[batch]).to(self.actor.device)
-                actions = T.tensor(action_arr[batch]).to(self.actor.device)
+                states = T.tensor(state_arr[batch], dtype=T.float32).to(self.actor.device)
+                old_probs = T.tensor(old_prob_arr[batch], dtype=T.float32).to(self.actor.device)
+                actions = T.tensor(action_arr[batch], dtype=T.float32).to(self.actor.device)
 
                 dist = self.actor(states)
                 critic_value = self.critic(states)
@@ -239,4 +252,3 @@ class Agent:
                 self.step_counter += 1
 
         self.memory.clear_memory()
-

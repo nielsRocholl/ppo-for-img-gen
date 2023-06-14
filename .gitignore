@@ -2,3 +2,10 @@
 .gitignor
 .DS_Store
 __pycache__/
+ppo_cartpole.py
+torch/data
+torch/runs
+torch/plots
+torch/states
+torch/videos
+torch/pixel_art
