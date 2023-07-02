@@ -2,9 +2,9 @@
 
 ![Example Image Reconstruction](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeHVzOWg0bWMxc3ZwaHJzdzA0MnJheHNjYWY1ZWY4MXBybDV6aW5sNCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/AyCG8FIPjWEP4XSlH2/giphy.gif)
 
-This project explores the application of deep Reinforcement Learning (RL) algorithms in image reconstruction, utilizing the popular Generative Adversarial Networks. Notably, in the field of RL, little research has been conducted on art or image generation. Our objective, therefore, is not to generate original artwork, but to reconstruct a given image.
+This project explores the application of deep Reinforcement Learning (RL) algorithms in image reconstruction, utilizing the popular PPO algorithm.
 
-The task involves selecting a simple, binarized image (akin to pixel art or images of MNIST digits), which the agent must reconstruct within an environment represented by a grid, each cell signifying a pixel. The goal is to maximize the similarity between the recreated and the target image. Detailed information about the custom environment is discussed in the next section.
+The task involves selecting a simple, binarized image (akin to pixel art or images of MNIST digits), which the agent must reconstruct within an environment represented by a grid, each cell signifying a pixel. The goal is to maximize the similarity between the recreated and the target image.
 
 ## The Image Environment
 
