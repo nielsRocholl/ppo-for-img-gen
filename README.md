@@ -24,7 +24,7 @@ P = {e_{i_1,j_1}, e_{i_2,j_2}, ..., e_{i_k,j_k}}, where 1 ≤ k ≤ N², i_1 = j
 
 Here `P` is the path of the agent, representing the sequence of cells it visits, altering their states with actions from `A`.
 
-The agent's observation at any time step `t`, denoted as `O`, is a tuple consisting of the current environment state `E_{s_t}`, the agent's current position `P_{s_t}`, and the target image `T`.
+The agent's observation at any time step `t`, denoted as `O`, is a tuple consisting of the current environment state `$E_{s_t}`, the agent's current position `$P_{s_t}`, and the target image `T`.
 
 ```math
 O_t = ({E_{s_{t-i}}}{i=0}^{f-1}, {P{s{t-i}}}_{i=0}^{f-1}, T)
@@ -35,11 +35,11 @@ In this definition, `fps` denotes the frame-per-second parameter. If `fps = f`, 
 
 ## Reward Signal
 
-The reward signal was designed to encourage an equilibrium of potential rewards for both black and white cells, facilitating the accurate replication of the target image. The total possible reward `R` is split equally between white cells `C_w` and black cells `C_b`.
+The reward signal was designed to encourage an equilibrium of potential rewards for both black and white cells, facilitating the accurate replication of the target image. The total possible reward `R` is split equally between white cells `$C_w` and black cells `$C_b`.
 
-For an agent at position `e_{i, j}`, corresponding to target image location `t_{i, j}`, the reward is calculated as follows:
+For an agent at position `$e_{i, j}`, corresponding to target image location `$t_{i, j}`, the reward is calculated as follows:
 
-- For `t_{i, j}=1`, `r=R_{w}/C_{w}` if `e_{i, j}=t_{i, j}`, otherwise `r=-(R_{w}/C_{w})`;
-- For `t_{i, j}=0`, `r=R_{b}/C_{b}` if `e_{i, j}=t_{i, j}`, otherwise `r=-(R_{b}/C_{b})`.
+- For `$t_{i, j}=1`, `$r=R_{w}/C_{w}` if `$e_{i, j}=t_{i, j}`, otherwise `$r=-(R_{w}/C_{w})`;
+- For `$t_{i, j}=0`, `$r=R_{b}/C_{b}` if `$e_{i, j}=t_{i, j}`, otherwise `$r=-(R_{b}/C_{b})`.
 
 If the final step is reached with `S=T`, an extra reward of `0.1R` is given.
