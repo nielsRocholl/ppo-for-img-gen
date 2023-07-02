@@ -18,7 +18,7 @@ E = [e_{i,j} ∈ {0, 1} | 1 ≤ i, j ≤ N]
 The agent (`A`) operating within this environment has an action space `A = {0, 1}`, corresponding to changing a cell's state to 0 (black pixel) or 1 (white pixel). The agent initiates its trajectory at the top-left cell (`e_{1,1}`) and terminates at the bottom-right cell (`e_{N,N}`).
 
 ```math
-P = {e_{i_1,j_1}, e_{i_2,j_2}, ..., e_{i_k,j_k}}, where 1 ≤ k ≤ N², i_1 = j_1 = 1 and i_k = j_k = N
+P = {e_{i_1,j_1}, e_{i_2,j_2}, ..., e_{i_k,j_k}}, \text{ where } 1 ≤ k ≤ N², i_1 = j_1 = 1 \text{ and } i_k = j_k = N
 ```
 
 
