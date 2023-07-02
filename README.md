@@ -1,6 +1,6 @@
 # Image Reconstruction with Deep RL
 
-![Example Image Reconstruction](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeHVzOWg0bWMxc3ZwaHJzdzA0MnJheHNjYWY1ZWY4MXBybDV6aW5sNCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/AyCG8FIPjWEP4XSlH2/giphy.gif)
+![Example Image Reconstruction](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNDVpcnl6YXc5MW1tMGt6b3FkMWkzODhucGdmNmhlZmE4bXNlNmQxNyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/N7LXuxyfeVfttrzYvA/giphy.gif)
 
 This project explores the application of deep Reinforcement Learning (RL) algorithms in image reconstruction, utilizing the popular PPO algorithm.
 
