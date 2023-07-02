@@ -1,4 +1,4 @@
-# Image Reconstruction with Deep RL
+# Image Reconstruction with Proximal Policy Optimization
 
 ![Example Image Reconstruction](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNDVpcnl6YXc5MW1tMGt6b3FkMWkzODhucGdmNmhlZmE4bXNlNmQxNyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/N7LXuxyfeVfttrzYvA/giphy.gif)
 
